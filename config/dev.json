@@ -1,0 +1,16 @@
+{
+	"debug": true,
+		"databases": 
+		{
+			"master": 
+			{
+				"driver": "pdo_mysql", "host": "localhost", "dbname": "silex-dev", "user": "silex-dev", "password": "EJRPqAbMP7dDNDLV"
+			},
+			"cluddy": 
+			{
+				"driver": "pdo_mysql", "host": "localhost", "dbname": "cluddy-dev", "user": "silex-dev", "password": "EJRPqAbMP7dDNDLV"
+			}
+
+		}
+
+}
