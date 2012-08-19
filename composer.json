@@ -1,6 +1,21 @@
 {
-    "require": {
-        "silex/silex": "1.0.*"
-    },
-    "minimum-stability": "dev"
+	"autoload": {
+		"psr-0": { "": "src/" }
+	},
+		"require": {
+			"silex/silex": "1.0.*",
+			"doctrine/dbal": "2.2.*",
+			"twig/twig": ">=1.8,<2.0-dev",
+			"symfony/validator": "2.1.*",
+			"symfony/form": "2.1.*",
+			"symfony/config": "2.1.*",
+			"symfony/translation": "2.1.*",
+			"symfony/locale": "2.1.*",
+			"symfony/security": "2.1.*",
+			"swiftmailer/swiftmailer": ">=4.1.2,<4.2-dev",
+			"monolog/monolog": ">=1.0.0",
+			"symfony/yaml": "2.1.*",
+			"igorw/config-service-provider": "*"
+		},
+		"minimum-stability": "dev"
 }
