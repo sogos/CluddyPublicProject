@@ -1,0 +1,36 @@
+{% set modulefound = false %}
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="{{ path('_homepage') }}"><i class="icon-leaf"></i>Cluddy</a>
+    <ul class="nav">
+{% if module == "home" %}
+      <li class="active"><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a></li>
+{% set modulefound = true %}
+{% else %}
+      <li><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a></li>
+{% endif %}
+{% if module == "plop1" %}
+{% set modulefound = true %}
+      <li class="active"><a href="/de/plop1"><i class="icon-bookmark"></i>Plop1</a></li>
+{% else %}
+      <li><a href="/de/plop1"><i class="icon-bookmark"></i>Plop1</a></li>
+{% endif %}
+{% if module == "plop2" %}
+{% set modulefound = true %}
+      <li class="active"><a href="/fr/plop2"><i class="icon-bookmark"></i>Plop2</a></li>
+{% else %}
+      <li><a href="/fr/plop2"><i class="icon-bookmark"></i>Plop2</a></li>
+{% endif %}
+{% if module == "plop3" %}
+{% set modulefound = true %}
+      <li class="active"><a href="/en/plop3"><i class="icon-bookmark"></i>Plop3</a></li>
+{% else %}
+      <li><a href="/en/plop3"><i class="icon-bookmark"></i>Plop3</a></li>
+{% endif %}
+{% if modulefound == false %}
+      <li class="active"><a href="#"><i class="icon-bookmark"></i> {{ module }}</a></li>
+{% endif %}
+    </ul>
+  </div>
+</div>
+
