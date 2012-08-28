@@ -11,6 +11,21 @@
 				"driver": "pdo_mysql", "host": "localhost", "dbname": "cluddy-dev", "user": "silex-dev", "password": "EJRPqAbMP7dDNDLV"
 			}
 
+		},
+		"firewalls":
+		{
+			"main":
+			{
+				"pattern": "^/admin",
+				"form":
+				{
+					"login_path": "/login",
+					"check_path": "/admin/login_check"
+				},
+				"logout":
+				{
+					"logout_path": "/logout"
+				}
+			}
 		}
-
 }
