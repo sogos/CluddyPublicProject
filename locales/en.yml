@@ -1,1 +1,6 @@
-module: moduleEN
+locale: en
+localeflags: gb
+module: module
+language: language
+currentlanguage: current language
+switch: switch to

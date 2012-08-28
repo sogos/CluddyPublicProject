@@ -11,6 +11,7 @@
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="/flags/flags.css" rel="stylesheet">
 </head>
 <body>
  <div class="container">
@@ -39,8 +40,16 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>
 {% endif %}
 </center>
-</div>
+<center>
+<small>{{ 'currentlanguage'|trans|title }}:</small>
+<img src="blank.gif" class="flag flag-{{ 'localeflags'|trans }}"/><br>
+<small> {{ 'switch'|trans|title }}</small>
+<a href="/en{{url}}"><img src="blank.gif" class="flag flag-gb"/></a>
+<a href="/fr{{url}}"><img src="blank.gif" class="flag flag-fr"/></a>
+<a href="/de{{url}}"><img src="blank.gif" class="flag flag-de"/></a>
+</center>
 
+</div>
 <script src="/js/jquery-1.8.0.min.js"></script>
 <script src="/google-code-prettify/prettify.js"></script>
 <script src="/js/bootstrap.min.js"></script>

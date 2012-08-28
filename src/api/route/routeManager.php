@@ -83,12 +83,23 @@ class routeManager {
 	}
 
 	public function get(\Silex\Application $app,$locale,$module = "", $action = "", $id = "") {
-				$app['translator']->setLocale($locale);
-			$app['monolog']->addWarning(sprintf(">> Calling Route: " . $module . ":" . $action . ":". $id));
+		$app['translator']->setLocale($locale);
+		$url = "";
+		if(!empty($module)) {
+			$url .= '/'. $module;
+		}
+		if(!empty($action)) {
+			$url .= '/'. $module;
+		}
+		if(!empty($id)) {
+			$url .= '/'. $id;
+		}
+		$app['monolog']->addWarning(sprintf(">> Calling Route: " . $module . ":" . $action . ":". $id));
 			return new Response($app['twig']->render('debug.twig', array(
 						'module' => $module,
 						'action' => $action,
 						'id' => $id,
+						'url' => $url
 						)), 200, array(
 						'Cache-Control' => 's-maxage=5, public',
 						

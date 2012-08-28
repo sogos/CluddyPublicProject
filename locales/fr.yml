@@ -1,1 +1,6 @@
-module: moduleFR
+locale: fr
+localeflags: fr
+module: module
+language: langue
+currentlanguage: langue actuelle
+switch: basculer vers

@@ -1,1 +1,6 @@
+locale: de
+localeflags: de
 module: modul
+language: sprache
+currentlanguage: aktuelle Sprache
+switch: wechseln
