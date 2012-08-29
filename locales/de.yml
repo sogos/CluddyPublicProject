@@ -4,3 +4,7 @@ module: modul
 language: sprache
 currentlanguage: aktuelle Sprache
 switch: wechseln
+search: Suche
+login: Login
+username: Benutzername
+password: Kennwort

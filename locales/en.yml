@@ -4,3 +4,7 @@ module: module
 language: language
 currentlanguage: current language
 switch: switch to
+search: search
+login: Login
+username: Username
+password: Password

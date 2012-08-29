@@ -16,10 +16,10 @@
 		{
 			"main":
 			{
-				"pattern": "^/admin",
+				"pattern": "^/.*/admin",
 				"form":
 				{
-					"login_path": "/login",
+					"login_path": "_login",
 					"check_path": "/admin/login_check"
 				},
 				"logout":

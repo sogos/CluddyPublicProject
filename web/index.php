@@ -33,9 +33,6 @@ if(isset($_SERVER["HTTPS"])) {
 }
 $app->register(new Silex\Provider\UrlGeneratorServiceProvider());
 
-$app['route_Manager'] = $app->share(function ($app) {
-    return new routeManager($app);
-    });
 
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../themes/default/',
@@ -53,7 +50,6 @@ $app->register(new Silex\Provider\HttpCacheServiceProvider(), array(
     'http_cache.cache_dir' => __DIR__.'/../cache/',
 ));
 Request::trustProxyData();
-$routeManager = $app['route_Manager']->boot();
 
 
 $app->register(new Silex\Provider\MonologServiceProvider(), array(
@@ -77,6 +73,15 @@ $app['translator'] = $app->share($app->extend('translator', function($translator
     return $translator;
 }));
 $app->register(new Silex\Provider\SessionServiceProvider());
+
+use Silex\Provider\FormServiceProvider;
+$app->register(new FormServiceProvider());
+$app->register(new Silex\Provider\ValidatorServiceProvider());
+
+$app['route_Manager'] = $app->share(function ($app) {
+    return new routeManager($app);
+    });
+$routeManager = $app['route_Manager']->boot();
 
 #$sm = $app['db']->getSchemaManager();
 #echo "<pre>";

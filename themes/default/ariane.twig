@@ -1,36 +1,69 @@
-{% set modulefound = false %}
 <div class="navbar">
-  <div class="navbar-inner">
-    <a class="brand" href="{{ path('_homepage') }}"><i class="icon-leaf"></i>Cluddy</a>
-    <ul class="nav">
+  <div class="navbar-inner ">
+    <div class="container">
+ 
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+ 
+      <!-- Be sure to leave the brand out there if you want it shown -->
+      <a class="brand" href="{{ path('_homepage') }}"><i class="icon-leaf"></i>Cluddy</a>
+	<form class="navbar-search pull-left" action="">
+                      <input type="text" class="search-query span2 inverse" placeholder="{{ 'search'|trans|title }}">
+                    </form>
+	<ul class="nav pull-right">
+                      <li><a href="#">Link</a></li>
+                      <li class="divider-vertical"></li>
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="#">Action</a></li>
+                          <li><a href="#">Another action</a></li>
+                          <li><a href="#">Something else here</a></li>
+                          <li class="divider"></li>
+                          <li><a href="#">Separated link</a></li>
+                        </ul>
+                      </li>
+                    </ul> 
+      <!-- Everything you want hidden at 940px or less, place within here -->
+      <div class="nav-collapse">
+        <!-- .nav, .navbar-search, .navbar-form, etc -->
+      </div>
+ 
+    </div>
+  </div>
+</div>
+{% set modulefound = false %}
+    <ul class="breadcrumb">
 {% if module == "home" %}
-      <li class="active"><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a></li>
+      <li class="active"><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a><span class="divider">/</span></li>
 {% set modulefound = true %}
 {% else %}
-      <li><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a></li>
+      <li><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a><span class="divider">/</span></li>
 {% endif %}
 {% if module == "plop1" %}
 {% set modulefound = true %}
-      <li class="active"><a href="/de/plop1"><i class="icon-bookmark"></i>Plop1</a></li>
+      <li class="active"><a href="/de/plop1">Plop1</a><span class="divider">/</span></li>
 {% else %}
-      <li><a href="/de/plop1"><i class="icon-bookmark"></i>Plop1</a></li>
+      <li><a href="/de/plop1">Plop1</a><span class="divider">/</span></li>
 {% endif %}
 {% if module == "plop2" %}
 {% set modulefound = true %}
-      <li class="active"><a href="/fr/plop2"><i class="icon-bookmark"></i>Plop2</a></li>
+      <li class="active"><a href="/fr/plop2">Plop2</a><span class="divider">/</span></li>
 {% else %}
-      <li><a href="/fr/plop2"><i class="icon-bookmark"></i>Plop2</a></li>
+      <li><a href="/fr/plop2">Plop2</a><span class="divider">/</span></li>
 {% endif %}
 {% if module == "plop3" %}
 {% set modulefound = true %}
-      <li class="active"><a href="/en/plop3"><i class="icon-bookmark"></i>Plop3</a></li>
+      <li class="active"><a href="/en/plop3">Plop3</a><span class="divider">/</span></li>
 {% else %}
-      <li><a href="/en/plop3"><i class="icon-bookmark"></i>Plop3</a></li>
+      <li><a href="/en/plop3">Plop3</a><span class="divider">/</span></li>
 {% endif %}
 {% if modulefound == false %}
-      <li class="active"><a href="#"><i class="icon-bookmark"></i> {{ module }}</a></li>
+      <li class="active"><a href="#"><i class="icon-bookmark"></i> {{ module }}</a><span class="divider">/</span></li>
 {% endif %}
     </ul>
-  </div>
-</div>
 
