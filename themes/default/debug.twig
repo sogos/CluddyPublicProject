@@ -1,6 +1,12 @@
 {% extends "base.twig" %}
 
 {% block content %}
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    <a href="{{ path('_logout') }}">Logout</a>
+{% else %}
+    <a href="{{ path('_login') }}">Login</a>
+{% endif %}
+
 <br>
     <div class="alert">
     <strong>{{ 'module'|trans|title }}: {{module}}</strong> {{action}} {{id}}

@@ -13,14 +13,20 @@
 
 		},
 		"firewalls":
-		{
+		{	
+			"login":
+			{
+				"pattern": "^/.*/login"
+			},
 			"main":
 			{
-				"pattern": "^/.*/admin",
+				"cluddysecurity": "true",
+				"pattern": "^/",
 				"form":
 				{
 					"login_path": "_login",
-					"check_path": "/admin/login_check"
+					"check_path": "_login_check",
+					"default_target_path": "_homepage"
 				},
 				"logout":
 				{

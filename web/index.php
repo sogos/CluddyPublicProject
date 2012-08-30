@@ -43,7 +43,7 @@ $app['twig'] = $app->share($app->extend('twig', function($twig, $app) use ($ssl)
 }));
 
 $app->register(new Silex\Provider\SecurityServiceProvider(), array(
-	'security.firewalls' => $app['firewalls']
+	'security.firewalls' => $app['firewalls'],
 ));
 
 $app->register(new Silex\Provider\HttpCacheServiceProvider(), array(
@@ -54,7 +54,7 @@ Request::trustProxyData();
 
 $app->register(new Silex\Provider\MonologServiceProvider(), array(
     'monolog.logfile' => __DIR__.'/../logs/'. $env . '.log',
-    'monolog.level' => Logger::WARNING
+    'monolog.level' => Logger::DEBUG
 ));
 
 use Symfony\Component\Translation\Loader\YamlFileLoader;
@@ -81,7 +81,42 @@ $app->register(new Silex\Provider\ValidatorServiceProvider());
 $app['route_Manager'] = $app->share(function ($app) {
     return new routeManager($app);
     });
+
+
+use api\Security\User\CluddyUserProvider;
+$app['users'] = $app->share(function ($app) {
+		return new CluddyUserProvider($app['db']);
+});
+
+$app['users']->checkDatabase();
+use api\Security\Authentication\Provider\CluddySecurityProvider;
+use api\Security\Firewall\CluddySecurityListener;
+$app['security.authentication_listener.factory.cluddysecurity'] = $app->protect(function ($name, $options) use ($app) {
+		// define the authentication provider object
+		$app['security.authentication_provider.'.$name.'.cluddy'] = $app->share(function () use ($app) {
+			return new CluddySecurityProvider($app['users'], __DIR__.'/security_cache');
+			});
+
+		// define the authentication listener object
+		$app['security.authentication_listener.'.$name.'.cluddy'] = $app->share(function () use ($app) {
+			return new CluddySecurityListener($app['security'], $app['security.authentication_manager'], $app);
+			});
+
+		return array(
+			// the authentication provider id
+			'security.authentication_provider.'.$name.'.cluddy',
+			// the authentication listener id
+			'security.authentication_listener.'.$name.'.cluddy',
+			// the entry point id
+			null,
+			// the position of the listener in the stack
+			'pre_auth'
+			);
+});
+
 $routeManager = $app['route_Manager']->boot();
+
+
 
 #$sm = $app['db']->getSchemaManager();
 #echo "<pre>";
