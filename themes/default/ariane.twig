@@ -37,6 +37,7 @@
   </div>
 </div>
 {% set modulefound = false %}
+{% if app.security.token.authenticated %}
     <ul class="breadcrumb">
 {% if module == "home" %}
       <li class="active"><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a><span class="divider">/</span></li>
@@ -66,4 +67,4 @@
       <li class="active"><a href="#"><i class="icon-bookmark"></i> {{ module }}</a><span class="divider">/</span></li>
 {% endif %}
     </ul>
-
+{% endif %}

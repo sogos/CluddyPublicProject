@@ -9,22 +9,23 @@ use api\language\languageUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Monolog\Logger;
+use api\Security\User\CluddyUserProvider;
+use Monolog\Handler\StreamHandler;
+use api\Logger\CluddyLogger;
 
 $app = new Silex\Application();
+$app['logger'] =  $app->share(function () use ($app) {
+                return new CluddyLogger($app);
+                });
+
 
 $env = getenv('APP_ENV') ?: 'prod';
 $app->register(new Igorw\Silex\ConfigServiceProvider(__DIR__."/../config/$env.json"));
 
-// definitions
-#$app['url_service'] = function() {
-#	return new routeManager();
-#};
-#echo "<pre>";
-#print_r($app['databases']);
-#echo "</pre>";
+
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
-	'dbs.options' =>$app['databases']
-));
+			'dbs.options' =>$app['databases']
+			));
 
 if(isset($_SERVER["HTTPS"])) {
 	$ssl = "on";
@@ -33,45 +34,46 @@ if(isset($_SERVER["HTTPS"])) {
 }
 $app->register(new Silex\Provider\UrlGeneratorServiceProvider());
 
+$app->register(new Silex\Provider\MonologServiceProvider(), array(
+			'monolog.logfile' => __DIR__.'/../logs/'. $env . '.log',
+			'monolog.level' => Logger::DEBUG,
+			'monolog.name' => 'app',
+			));
+
 
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
-    'twig.path' => __DIR__.'/../themes/default/',
-));
+			'twig.path' => __DIR__.'/../themes/default/',
+			));
 $app['twig'] = $app->share($app->extend('twig', function($twig, $app) use ($ssl) {
-    $twig->addGlobal('ssl', $ssl);
-    return $twig;
-}));
+			$twig->addGlobal('ssl', $ssl);
+			return $twig;
+			}));
 
-$app->register(new Silex\Provider\SecurityServiceProvider(), array(
-	'security.firewalls' => $app['firewalls'],
-));
 
 $app->register(new Silex\Provider\HttpCacheServiceProvider(), array(
-    'http_cache.cache_dir' => __DIR__.'/../cache/',
-));
+			'http_cache.cache_dir' => __DIR__.'/../cache/',
+			));
 Request::trustProxyData();
 
 
-$app->register(new Silex\Provider\MonologServiceProvider(), array(
-    'monolog.logfile' => __DIR__.'/../logs/'. $env . '.log',
-    'monolog.level' => Logger::DEBUG
-));
 
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
 $app->register(new Silex\Provider\TranslationServiceProvider(), array(
-    'locale_fallback' => 'en',
-));
+			'locale_fallback' => 'en',
+			));
 
 $app['translator'] = $app->share($app->extend('translator', function($translator, $app) {
-    $translator->addLoader('yaml', new YamlFileLoader());
+			$translator->addLoader('yaml', new YamlFileLoader());
 
-    $translator->addResource('yaml', __DIR__.'/../locales/en.yml', 'en');
-    $translator->addResource('yaml', __DIR__.'/../locales/de.yml', 'de');
-    $translator->addResource('yaml', __DIR__.'/../locales/fr.yml', 'fr');
+			$translator->addResource('yaml', __DIR__.'/../locales/en.yml', 'en');
+			$translator->addResource('yaml', __DIR__.'/../locales/de.yml', 'de');
+			$translator->addResource('yaml', __DIR__.'/../locales/fr.yml', 'fr');
 
-    return $translator;
-}));
+			return $translator;
+			}));
+
+
 $app->register(new Silex\Provider\SessionServiceProvider());
 
 use Silex\Provider\FormServiceProvider;
@@ -79,43 +81,54 @@ $app->register(new FormServiceProvider());
 $app->register(new Silex\Provider\ValidatorServiceProvider());
 
 $app['route_Manager'] = $app->share(function ($app) {
-    return new routeManager($app);
-    });
+		return new routeManager($app);
+		});
 
 
-use api\Security\User\CluddyUserProvider;
-$app['users'] = $app->share(function ($app) {
-		return new CluddyUserProvider($app['db']);
-});
 
-$app['users']->checkDatabase();
+$routeManager = $app['route_Manager']->boot();
 use api\Security\Authentication\Provider\CluddySecurityProvider;
 use api\Security\Firewall\CluddySecurityListener;
+
+$app->register(new Silex\Provider\SecurityServiceProvider());
+$app['security.firewalls'] = array(
+                'login' => array(
+                        'pattern' => '^/login$',
+                        ),
+                'main' => array(
+			'cluddysecurity' => array('login_path' => '_login', 'check_path' => '/login_check'),
+                        'pattern' => '^.*$',
+                        'users' => $app->share(function () use ($app) {
+                                return new CluddyUserProvider($app['db'], $app['logger']);
+                                }),
+                        ),
+                );
+
+
+
 $app['security.authentication_listener.factory.cluddysecurity'] = $app->protect(function ($name, $options) use ($app) {
 		// define the authentication provider object
-		$app['security.authentication_provider.'.$name.'.cluddy'] = $app->share(function () use ($app) {
-			return new CluddySecurityProvider($app['users'], __DIR__.'/security_cache');
+
+		$app['security.authentication_provider.'.$name.'.cluddysecurity'] = $app->share(function () use ($app,$options) {
+			return new CluddySecurityProvider($app['security.user_provider.main'], __DIR__.'/../security_cache', $app['logger']);
 			});
 
 		// define the authentication listener object
-		$app['security.authentication_listener.'.$name.'.cluddy'] = $app->share(function () use ($app) {
-			return new CluddySecurityListener($app['security'], $app['security.authentication_manager'], $app);
+		$app['security.authentication_listener.'.$name.'.cluddysecurity'] = $app->share(function ($options) use ($app) {
+			return new CluddySecurityListener($app['security'], $app['security.authentication_manager'], $app,$options);
 			});
 
 		return array(
 			// the authentication provider id
-			'security.authentication_provider.'.$name.'.cluddy',
+			'security.authentication_provider.'.$name.'.cluddysecurity',
 			// the authentication listener id
-			'security.authentication_listener.'.$name.'.cluddy',
+			'security.authentication_listener.'.$name.'.cluddysecurity',
 			// the entry point id
 			null,
 			// the position of the listener in the stack
-			'pre_auth'
+			'pre_auth',
 			);
 });
-
-$routeManager = $app['route_Manager']->boot();
-
 
 
 #$sm = $app['db']->getSchemaManager();
@@ -142,8 +155,8 @@ $routeManager = $app['route_Manager']->boot();
 //		});
 if ($app['debug']) {
 	$app->run();
- }
- else{
-	 $app['http_cache']->run();
- }
+}
+else{
+	$app['http_cache']->run();
+}
 ?>

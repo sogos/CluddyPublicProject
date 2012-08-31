@@ -44,6 +44,24 @@ class routeManager {
 			->value('locale', $fallback_language)
 			->bind('_ariane');
 
+		$app->post("/login_check", function() use ($app) {
+				$token = $app['security']->getToken();
+				if (null !== $token) {
+				$user = $token->getUser();
+				return $app->redirect($app['url_generator']->generate('_homepage'));
+				} else {
+				return $app->redirect($app['url_generator']->generate('_login'));
+				}
+				})->bind('login_check');
+
+		$app->get("/logout", function() use ($app) {
+				$app['security']->setToken(null);
+				$app['session']->set('isAuthenticated', false);
+				session_destroy();
+				return $app->redirect($app['url_generator']->generate('_login'));
+				})->bind('_logout');
+
+
 		$facebook_app_id = getenv('facebook_app_id');
 		$facebook_secret_id = getenv('facebook_secret_id');
 		$app->get('/{locale}/facebook_check', function ($locale) use ($app, $facebook_app_id) {
@@ -88,24 +106,10 @@ class routeManager {
 			->bind('_homepage');
 
 
-		$app->get('/{locale}/home', function ($locale) use ($app) {
-				return $app['route_Manager']->get($app,$locale,"home");
-				})
-		->value('locale', $fallback_language)
-			->bind('_logout');
 
-		$app->match('/{locale}/admin/check_path', function (Request $request,$locale) use ($app) {
-				 $user = $app['session']->get('username');
-				return $app['route_Manager']->get($app,$locale,"home");
-				})
-		->value('locale', $fallback_language)
-			->bind('_check_path');
-
-
-		$app->match('/{locale}/login', function (Request $request, $locale) use ($app) {
+		$app->match('/login', function (Request $request) use ($app,  $fallback_language) {
+				$locale = $fallback_language;
 				$app['monolog']->addWarning(sprintf(">> Calling Route: _login"));
-				$app['translator']->setLocale($locale);
-				$app['session']->set('language', $locale);
 				$data = array(
 					'login' => '',
 					'password' => '',
@@ -123,7 +127,7 @@ class routeManager {
 				->getForm();
 
 
-		// display the form
+				// display the form
 		return new Response($app['twig']->render('login.twig', array(
 						'form' => $form->createView(),
 						'url' => '/login',
@@ -153,11 +157,6 @@ class routeManager {
 				})
 		->value('locale', $fallback_language)
 			->value('action','index');
-		/*	 $app->get('/{slug}', function ($slug) use ($app) {
-			 return $app['route_Manager']->get($app['request'],$slug);
-			 })
-			 ->assert('slug', '.+');
-		 */
 
 		$app->error(function (\Exception $e, $code) use ($app, $fallback_language) {
 				$locale = languageUtils::getClientLanguage();

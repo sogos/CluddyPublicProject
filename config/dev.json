@@ -16,21 +16,15 @@
 		{	
 			"login":
 			{
-				"pattern": "^/.*/login"
+				"pattern": "^/login"
 			},
 			"main":
 			{
-				"cluddysecurity": "true",
 				"pattern": "^/",
 				"form":
 				{
 					"login_path": "_login",
-					"check_path": "_login_check",
-					"default_target_path": "_homepage"
-				},
-				"logout":
-				{
-					"logout_path": "/logout"
+					"check_path": "/admin/check"
 				}
 			}
 		}
