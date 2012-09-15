@@ -11,6 +11,7 @@
  
       <!-- Be sure to leave the brand out there if you want it shown -->
       <a class="brand" href="{{ path('_homepage') }}"><i class="icon-leaf"></i>Cluddy</a>
+	{% if auth is sameas(true) %}
 	<form class="navbar-search pull-left" action="">
                       <input type="text" class="search-query span2 inverse" placeholder="{{ 'search'|trans|title }}">
                     </form>
@@ -27,7 +28,8 @@
                           <li><a href="#">Separated link</a></li>
                         </ul>
                       </li>
-                    </ul> 
+                    </ul>
+	{% endif %} 
       <!-- Everything you want hidden at 940px or less, place within here -->
       <div class="nav-collapse">
         <!-- .nav, .navbar-search, .navbar-form, etc -->
@@ -37,7 +39,7 @@
   </div>
 </div>
 {% set modulefound = false %}
-{% if app.security.token.authenticated %}
+{% if auth is sameas(true) %}
     <ul class="breadcrumb">
 {% if module == "home" %}
       <li class="active"><a href="{{ path('_homepage') }}"><i class="icon-home"></i> Home</a><span class="divider">/</span></li>

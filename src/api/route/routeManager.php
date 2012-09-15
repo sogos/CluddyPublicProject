@@ -5,9 +5,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use api\language\languageUtils;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use lib\yapl4twitter\Twitter;
+use lib\yapl4twitter\OAuth as TwitterOAuth;
 
 class routeManager {
+
 
 	public function http_fetch_url($url, $timeout = 10, $userpwd = '', $maxredirs = 10)
 	{
@@ -27,6 +29,11 @@ class routeManager {
 	}
 
 	public function __construct($app){
+		// Twitter specific		
+		$twitter_consumer_key =	"JPzjdyZhm3aL2ZVASTLqg";
+		$twitter_request_token_url = 'https://api.twitter.com/oauth/request_token';
+		$twitter_access_token_url = 'https://api.twitter.com/oauth/access_token';
+		$twitter_authorize_url = 'https://api.twitter.com/oauth/authorize';
 
 		$fallback_language = languageUtils::getClientLanguage();
 		$session_language = $app['session']->get('language');
@@ -34,9 +41,18 @@ class routeManager {
 			$fallback_language = $session_language;
 		}
 		$app->get('/{locale}/ariane/{module}', function ($locale,$module) use ($app) {
+				$auth= false;
+				$token = $app['security']->getToken();
+				if (null !== $token) {
+				$auth = true;
+				} else {
+				$auth = false;
+				}
+
 				return $app['twig']->render('ariane.twig', array(
 						'module' => $module,
-						'_locale' => $locale
+						'_locale' => $locale,
+						'auth' => $auth
 						));
 
 				})
@@ -69,7 +85,8 @@ class routeManager {
 				$app['session']->set('facebook_uniq', $facebook_uniq);
 				return $app->redirect(' https://www.facebook.com/dialog/oauth?client_id=' . $facebook_app_id . '&redirect_uri=https://www.cluddy.fr/' .$locale .'/facebook_step2&scope=user_about_me,email&state=' . $facebook_uniq);
 				})
-		->value('locale', $fallback_language);
+		->value('locale', $fallback_language)
+			->bind('facebook_check');
 
 		$app->get('/{locale}/facebook_step2', function (Request $request,$locale) use ($app, $facebook_app_id, $facebook_secret_id) {
 				$facebook_uniq = uniqid();
@@ -82,10 +99,15 @@ class routeManager {
 				$user = json_decode(file_get_contents($graph_url));
 				$app['session']->set('username', $user->username);
 				//echo '<img src="https://graph.facebook.com/' . $user->username. '/picture"/>';
-				return $app->redirect($app['url_generator']->generate('_homepage'));
+				$app['logger']->warn("User Accepted by Facebook");
+				return $app->redirect($app['url_generator']->generate('login_check', array(
+							'username' => $user->username,
+							'email' => $user->email,
+							'source' => 'facebook'
+							)
+						));
 				})
 		->value('locale', $fallback_language);
-
 
 		$app->get('/{locale}/{module}/{action}/{id}', function ($locale,$module,$action, $id) use ($app) {
 				return $app['route_Manager']->get($app,$locale,$module,$action,$id);
@@ -104,6 +126,54 @@ class routeManager {
 				})
 		->value('locale', $fallback_language)
 			->bind('_homepage');
+
+		$twitter_app_id = "";
+		$twitter_consumer_secret = "UVBlqFaa7lxogX12L7hcyTmr7AyDn1Fmb6AdH8dhWM0";
+		$app->get('/{locale}/twitter_check', function ($locale) use ($app,$twitter_consumer_key, $twitter_consumer_secret,$twitter_request_token_url, $twitter_authorize_url) {
+				$oa = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret);
+				$callback_url = 'https://www.cluddy.fr/'.$locale.'/twitter_step2';
+				$request_token = $oa->getRequestToken($twitter_request_token_url, $callback_url);
+//				print_r($request_token);
+				return $app->redirect($twitter_authorize_url . '?oauth_token=' . $request_token['oauth_token']);
+		})
+		->value('locale', $fallback_language)
+			->bind('twitter_check');
+
+
+		$app->get('/{locale}/twitter_step2', function (Request $request, $locale) use ($app,$twitter_consumer_key, $twitter_consumer_secret,$twitter_access_token_url) {
+
+				$oauth_token = $request->query->get('oauth_token');
+				$oauth_verifier = $request->query->get('oauth_verifier');
+				if(!empty($oauth_token) && !empty($oauth_verifier)) {
+
+				$oa = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret);
+				$callback_url = 'https://www.cluddy.fr/twitter_step2';
+				$access_token = $oa->getAccessToken($twitter_access_token_url, $oauth_token, $oauth_verifier);
+				$twitter = new Twitter($twitter_consumer_key, $twitter_consumer_secret, $access_token['oauth_token'], $access_token['oauth_token_secret']);
+				$twitter_response = $twitter->users_show($access_token['user_id']);
+				if(is_array($twitter_response) && isset($twitter_response['code']) && $twitter_response['code'] == '200') {
+					$user = json_decode($twitter_response['response']);
+					print_r($user);
+					$app['session']->set('username', $user->screen_name);
+					//echo '<img src="https://graph.facebook.com/' . $user->username. '/picture"/>';
+					$app['logger']->warn("User Accepted by Twitter");
+					return $app->redirect($app['url_generator']->generate('login_check', array(
+								'username' => $user->screen_name,
+								'access_token' => $access_token['oauth_token'],
+								'access_token_secret' => $access_token['oauth_token_secret'],
+								'twitter_user_id' => $access_token['user_id'],
+								'source' => 'twitter'
+								)));
+							} else {
+							return $app->redirect($app['url_generator']->generate('_login'));
+							}
+				} else {
+					return $app->redirect($app['url_generator']->generate('_login'));
+				}
+				return $app->redirect($twitter_authorize_url . '?oauth_token=' . $request_token['oauth_token']);
+				})
+		->value('locale', $fallback_language)
+			->bind('twitter_step2');
 
 
 
@@ -125,19 +195,26 @@ class routeManager {
 						'constraints' => array(new Assert\MinLength(5))
 						))
 				->getForm();
-
+				$auth= false;
+				$token = $app['security']->getToken();
+				if (null !== $token) {
+					$auth = $true;
+				} else {
+					$auth = false;
+				}
 
 				// display the form
-		return new Response($app['twig']->render('login.twig', array(
-						'form' => $form->createView(),
-						'url' => '/login',
-						'locale' => $locale,
-						'error' => $app['security.last_error']($request),
-						'module' => 'login'))
-				, 200, array(
-					'Cache-Control' => 's-maxage=5, public',
+				return new Response($app['twig']->render('login.twig', array(
+								'form' => $form->createView(),
+								'url' => '/login',
+								'locale' => $locale,
+								'auth' => $auth,
+								'error' => $app['security.last_error']($request),
+								'module' => 'login'))
+						, 200, array(
+							'Cache-Control' => 's-maxage=5, public',
 
-					));
+							));
 
 		})
 		->value('locale', $fallback_language)

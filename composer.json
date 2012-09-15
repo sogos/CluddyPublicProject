@@ -16,7 +16,8 @@
 			"swiftmailer/swiftmailer": ">=4.1.2,<4.2-dev",
 			"monolog/monolog": ">=1.0.0",
 			"symfony/yaml": "2.1.*",
-			"igorw/config-service-provider": "*"
+			"igorw/config-service-provider": "*",
+			"symfony/serializer": "*"
 		},
 		"minimum-stability": "dev"
 }

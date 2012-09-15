@@ -1,0 +1,53 @@
+{% extends "base.twig" %}
+{% block content %}
+<div class="span12">
+<div class="span6 offset2">
+    <ul id="myTab" class="nav nav-tabs">
+    <li class="active"><a href="#login" data-toggle="tab">{{ 'login'|trans|title }}</a></li>
+    <li><a href="#tiers" data-toggle="tab">Login via Third Party</a></li>
+    </ul>
+<div class="tab-content" id="myTabContent" >
+	<div class="tab-pane active" id="login">
+	<table class="table">
+		<tr>
+			<td class="span2"></td>
+			<td class="span4">
+			<form action="{{ path('login_check')}}" method="post" novalidate>
+			{% if error != '' %}
+				<div class="alert">
+			  		<button type="button" class="close" data-dismiss="alert"></button>
+			  		{{ error }}
+				</div>
+			{% endif %}
+
+			    {{ form_widget(form) }}
+			    <input class="btn btn-primary" type="submit" value="{{ 'login'|trans|title }}" name="login" />
+			</form>
+			</td>
+		</tr>
+	</table>
+	</div>
+	<div class="tab-pane" id="tiers">
+		<table class="table">
+			<tr>
+			<td><a href="{{ path('twitter_check') }}"><img src="/img/twitter-bird-blue-on-white.png" width="50px" height="50px" align="center"></a></td>
+			<td><img src="/img/LinkedIn_Logo60px.png" width="50px" height="50px" align="center"></td>
+			<td><a href="{{ path('facebook_check') }}"><img src="/img/facebook-connect.png" height="50px" align="center"></a></td>
+			</tr>
+			<tr>
+			<td colspan="3">En cours d'implementation</td>
+			</tr>
+			<tr>
+                        <td><img src="/img/openbox_logo.png" height="50px" align="center"></td>
+                        <td><img src="/img/viadeo_white.png" height="20" align="center"></td>
+                        <td><img src="/img/dropbox.png" align="center"></td>
+                        </tr>
+			<tr>
+			<td><img src="/img/connect_google.png" height="50px" align="center"></td>
+			<td><img src="/img/plain_sign_in_red.png" align="center"></td>
+			</tr>
+
+		</table>
+	</div>
+	</div>
+{% endblock %}

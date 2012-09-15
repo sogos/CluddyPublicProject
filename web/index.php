@@ -92,17 +92,30 @@ use api\Security\Firewall\CluddySecurityListener;
 
 $app->register(new Silex\Provider\SecurityServiceProvider());
 $app['security.firewalls'] = array(
-                'login' => array(
-                        'pattern' => '^/login$',
-                        ),
-                'main' => array(
+		'login' => array(
+			'pattern' => '^/login$',
+			),
+		'facebook1' => array(
+			'pattern' => '^/.*/facebook_check$',
+			),
+		'facebook2' => array(
+			'pattern' => '^/.*/facebook_step2$',
+			),
+		'twitter1' => array(
+			'pattern' => '^/.*/twitter_check$',
+			),
+		'twitter2' => array(
+			'pattern' => '^/.*/twitter_step2$',
+			),
+
+		'main' => array(
 			'cluddysecurity' => array('login_path' => '_login', 'check_path' => '/login_check'),
-                        'pattern' => '^.*$',
-                        'users' => $app->share(function () use ($app) {
-                                return new CluddyUserProvider($app['db'], $app['logger']);
-                                }),
-                        ),
-                );
+			'pattern' => '^/',
+			'users' => $app->share(function () use ($app) {
+				return new CluddyUserProvider($app['db'], $app['logger']);
+				}),
+			),
+		);
 
 
 
